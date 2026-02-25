@@ -1,0 +1,283 @@
+---
+title: "Analisis  _Cluster_ Non-Hirarki Metode K-Means"
+author: "Andika Bagus Saputra"
+date: "2025-11-30"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+<div align="justify">
+
+# 1. Pendahuluan
+## 1.1. Latar Belakang
+  Pendidikan merupakan salah satu pilar penting dalam pembangunan nasional karena berperan langsung dalam meningkatkan kualitas sumber daya manusia. Pemerataan dan ketersediaan fasilitas pendidikan, seperti jumlah sekolah pada setiap jenjang, menjadi indikator strategis untuk menilai sejauh mana suatu wilayah mampu menyediakan layanan pendidikan yang memadai bagi masyarakatnya. Indonesia sebagai negara kepulauan dengan karakteristik geografis dan demografis yang sangat beragam memiliki tantangan besar dalam mewujudkan pemerataan tersebut. Perbedaan kondisi antarprovinsi sering kali menyebabkan ketimpangan jumlah dan distribusi sekolah.
+  
+  Untuk memahami pola persebaran fasilitas pendidikan secara lebih komprehensif, diperlukan analisis kuantitatif yang mampu mengelompokkan provinsi berdasarkan kesamaan karakteristik jumlah sekolah di berbagai jenjang pendidikan, mulai dari SD, SMP, SMA, SMK, hingga perguruan tinggi. Salah satu metode analisis yang umum digunakan untuk tujuan pengelompokan adalah analisis  _cluster_, khususnya metode k-means yang termasuk dalam kategori  _cluster_ non hirarki.
+  
+  Metode k-means memungkinkan pengelompokan provinsi ke dalam beberapa klaster yang memiliki karakteristik serupa sehingga dapat memberikan gambaran mengenai wilayah dengan tingkat ketersediaan fasilitas pendidikan yang tinggi, sedang, ataupun rendah. Hasil analisis ini dapat digunakan sebagai dasar dalam pengambilan keputusan, perencanaan pembangunan pendidikan, maupun alokasi sumber daya secara lebih tepat sasaran.
+
+## 1.2. Rumusan Masalah
+Berdasarkan latar belakang yang telah dibuat, diperoleh rumusan masalah sebagai berikut.
+
+1. Berapa jumlah klaster yang paling sesuai untuk mengklasifikasikan provinsi di Indonesia berdasarkan persebaran fasilitas pendidikan?
+
+2. Apa karakteristik masing-masing klaster yang terbentuk dan bagaimana perbedaan kondisi pendidikan antar klaster tersebut?
+
+## 1.3. Tujuan Penelitian
+Berdasarkan rumusan masalah yang telah dibuat, tujuan penelitian ini adalah sebagai berikut.
+
+1. Untuk menentukan jumlah klaster yang paling sesuai dalam menggambarkan pola persebaran fasilitas pendidikan antarprovinsi.
+
+2. Untuk menganalisis karakteristik masing-masing klaster yang terbentuk serta memahami perbedaan kondisi pendidikan antar klaster.
+
+# 2. Tinjauan Pustaka
+## 2.1. Analisis  _Cluster_
+  Analisis  _cluster_ merupakan metode statistik yang diterapkan untuk mengelompokkan sejumlah data atau objek ke dalam  _cluster_ berdasarkan karakteristik yang dimiliki oleh data atau objek tersebut (Awaliyah dkk., 2024). Objek-objek yang berada dalam satu kelompok diharapkan memiliki tingkat kesamaan yang lebih tinggi dibandingkan dengan objek-objek dari kelompok lainnya (Hair dkk., 2010). Analisis  _cluster_ yang baik memiliki ciri-ciri sebagai berikut.
+
+1. Memiliki kesamaan (homogenitas) yang tinggi antar objek dalam satu  _cluster_ ( _within cluster_).
+2. Memiliki perbedaan (heterogenitas) yang tinggi antar  _cluster_ yang satu dengan  _cluster_ yang lainnya ( _between cluster_).
+
+  Secara umum, analisis  _cluster_ dibagi menjadi dua metode, yaitu metode hirarki dan metode non-hirarki. Metode hirarki merupakan metode pengelompokan ketika banyak  _cluster_ belum diketahui. Metode hirarki melakukan pengelompokan dengan terlebih dahulu menggabungkan dua atau lebih objek yang memiliki karakteristik serupa. Proses ini kemudian berlanjut dengan menggabungkan objek lain yang paling mirip secara bertahap hingga terbentuk struktur berjenjang yang jelas antar objek, yang biasanya divisualisasikan dalam bentuk dendrogram. Metode non-hirarki merupakan metode pengelompokan dengan menentukan banyak  _cluster_ terlebih dahulu berdasarkan preferensi atau kebutuhan peneliti. Setelah menentukan banyak  _cluster_, maka selanjutnya akan ditentukan centroid dari setiap  _cluster_, kemudian jarak setiap objek dengan _centroid_ dihitung dan _centroid_ yang baru kembali dihitung. Proses ini berlanjut sampai tidak ada pemindahan objek ke  _cluster_ lain.
+
+## 2.2. Algoritma _K-Means_
+Salah satu metode analisis _cluster_ non-hirarki yang sering digunakan adalah analisis _K-Means clustering_. _K-Means_ adalah algoritma yang mengelompokkan data ke dalam beberapa _cluster_ berdasarkan kesamaan karakteristik tertentu (Putri & Rahmah, 2024). Prinsip utama metode _K-Means_ yaitu menyusun _centroid_ dari sekumpulan data berdimensi. Metode ini membutuhkan parameter input sebanyak 𝑘 dan membagi sekumpulan 𝑛 objek ke dalam _cluster_ sebanyak 𝑘 sehingga terbentuk _cluster_ yang baik dengan homogenitas internal yang tinggi dan heterogenitas eksternal yang tinggi (Johnson & Wichern, 2007). Tahapan algoritma _K-Means_ adalah sebagai berikut.
+
+1. Menentukan besar 𝑘 sebagai banyak _cluster_ yang ingin dibentuk.
+2. Mengelompokkan objek ke dalam _cluster_ secara acak.
+3. Menentukan centroid awal untuk setiap _cluster_ berdasarkan objek yang telah dikelompokkan.
+4. Menghitung jarak objek dengan _centroid_ menggunakan rumus jarak _Euclidean_.
+5. Mengelompokkan setiap objek ke dalam _cluster_ berdasarkan jarak minimum.
+$$Cluster(X_i)=min\ d(x_i, C_k)$$
+
+6. Melakukan proses iterasi dengan menentukan _centroid_ baru menggunakan persamaan berikut.
+
+$$C_i = \frac{\sum_{i=1}^n X_i}{n}$$
+
+7. Melakukan iterasi dengan mengulangi langkah 4 hingga 6 sampai tidak ada lagi objek yang berpindah _cluster_.
+
+8. Melakukan validasi hasil _cluster_ menggunakan Indeks _Shilouette_.
+
+## 2.3. Jarak _Euclidean_
+Jarak Euclidean merupakan salah satu ukuran jarak yang paling umum digunakan dalam analisis cluster di mana jarak ini menggunakan prinsip phytagoras. Jarak Euclidean merupakan salah satu metode perhitungan yang digunakan untuk menentukan jarak antara dua titik dalam ruang Euclidean, baik dalam dua dimensi, tiga dimensi, maupun dimensi yang lebih tinggi (Pribadi dkk., 2022). 
+
+Rumus yang digunakan untuk menghitung jarak Euclidean ditunjukkan pada persamaan berikut.
+$$
+d(x,y)=\sqrt{\sum_{i=1}^n(x_i-y_i)^2}
+$$
+dengan:<br>
+$d(x,y)$  = Jarak _Euclidean_ antar objek $x$ dan $y$ <br>
+$x_i$     = Nilai variabel ke-$i$ objek $x$ <br>
+$y_i$     = Nilai variabel ke-$i$ objek $y$ <br>
+
+## 2.4. Indeks _Shilouette_
+Indeks _Silhoutte_ dapat dihitung dengan rumus sebagai berikut:
+$$
+S(i)=\frac{b(i)-a(i)}{max\{a(i),b(i)\}}
+$$
+dengan: <br>
+$a(i)$ = rata-rata kemiripan antara objek ke-$i$ dengan objek lain di dalam clusternya <br>
+$b(i)$ = nilai minimum dari rata-rata kemiripan antara objek ke-$i$ dengan objek lain di luar _cluster_ <br>
+Indeks ini mengukur derajat kepercayaan dalam proses clustering pada pengamatan tertentu dengan cluster yang dikatakan terbentuk baik bila nilai indeks mendekati 1 dan sebaliknya jika nilai indeks mendekati -1.
+
+
+# 3. _Source Code_
+## 3.1. Memuat _Packages_
+``` {r, warning=F, message=F}
+library(tidyverse)
+library(readxl)
+library(factoextra)
+library( cluster)
+library(knitr)
+```
+
+Mengaktifkan _packages_ yang akan digunakan untuk melakukan analisis.
+
+## 3.2. Menyiapkan Data
+```{r, warning=F, message=F, results='hide', fig.show='hide'}
+data = read_excel('C:/Kuliah/SEMESTER 5/Analisis Multivariat 1/DATA_SEKOLAH.xlsx')
+head(data)
+dataclust = (data[,-1])
+
+summ = data.frame(
+  Variabel = c('SD', 'SMP', 'SMU', 'SMK', 'PT'),
+  Min = c(min(data$SD), min(data$SMP), min(data$SMU), min(data$SMK), min(data$`Perguruan Tinggi`)),
+  Mean = c(mean(data$SD), mean(data$SMP), mean(data$SMU), mean(data$SMK), mean(data$`Perguruan Tinggi`)),
+  Max= c(max(data$SD), max(data$SMP), max(data$SMU), max(data$SMK), max(data$`Perguruan Tinggi`)),
+  Std = c(sd(data$SD), sd(data$SMP), sd(data$SMU), sd(data$SMK), sd(data$`Perguruan Tinggi`))
+)
+
+kable(summ, caption = 'Hasil Statistika Deskriptif', align = 'c')
+```
+
+Menimpor data dari excel ke R dan melakukan analisis statistika deskriptif meliputi nilai min, mean, max, dan standar deviasi.
+
+## 3.3. Menentukan K-optimal
+```{r, results='hide', fig.show='hide'}
+fviz_nbclust(data[,-1], kmeans, method = "silhouette")
+```
+
+Menentukan banyak _cluster_ optimal menggunakan metode _Silhouette_.
+
+## 3.4. Metode K-Means
+### 3.4.1. Menentukan Anggota Kelompok
+```{r, results='hide'}
+set.seed(123)
+km <- kmeans(data[,-1], centers = 2)
+
+data$cluster <- as.factor(km$cluster)
+kable(data, caption = 'Tabel Provinsi di Indonesia')
+c1 = data$PROVINSI[data$cluster == 1]
+c2 = data$PROVINSI[data$cluster == 2]
+c1 = paste(c1, collapse = ',')
+c2 = paste(c2, collapse = ',')
+
+kelompok = data.frame(
+  Cluster = c(' cluster 1','cluster 2'),
+  Anggota = c(c1,c2)
+)
+kable(kelompok, caption = 'Anggota kelompok hasil  clustering')
+
+```
+
+Melakukan analisis _cluster_ menggunakan algoritma _K-Means_ untuk menentukan letak provinsi di _cluster_ yang tepat.
+
+### 3.4.2. Visualisasi
+```{r, results='hide', fig.show='hide'}
+fviz_cluster(km, data = dataclust)
+
+karakteristik <- dataclust %>%
+  mutate( cluster = km$cluster) %>%
+  group_by(cluster) %>%
+  summarise_all("mean")
+
+kable(karakteristik, caption = 'Karakteristik Cluster', digits = 3)
+
+```
+
+Membuat visualisasi _cluster_ dalam bentuk plot.
+
+## 3.5. Indeks Validitas
+```{r,  results='hide'}
+sil <- silhouette(km$cluster, dist(dataclust, method = 'euclidean'))
+sil_df <- as.data.frame(sil)
+sil_avg_per_cluster <- sil_df %>% 
+  group_by(cluster) %>%
+  summarise(`Mean Silhouette` = mean(sil_width))
+
+kable(sil_avg_per_cluster, caption = 'Rata-rata nilai silhouette tiap cluster', digits = 3)
+```
+
+Menghitung indeks validitas _silhouette_ untuk menentukan seberapa baik _cluster_ yang terbentuk.
+
+# 4. Hasil dan Pembahasan
+## 4.1. Data 
+```{r, echo=F}
+data = read_excel('C:/Kuliah/SEMESTER 5/Analisis Multivariat 1/DATA_SEKOLAH.xlsx')
+head(data)
+dataclust = (data[,-1])
+
+summ = data.frame(
+  Variabel = c('SD', 'SMP', 'SMU', 'SMK', 'PT'),
+  Min = c(min(data$SD), min(data$SMP), min(data$SMU), min(data$SMK), min(data$`Perguruan Tinggi`)),
+  Mean = c(mean(data$SD), mean(data$SMP), mean(data$SMU), mean(data$SMK), mean(data$`Perguruan Tinggi`)),
+  Max= c(max(data$SD), max(data$SMP), max(data$SMU), max(data$SMK), max(data$`Perguruan Tinggi`)),
+  Std = c(sd(data$SD), sd(data$SMP), sd(data$SMU), sd(data$SMK), sd(data$`Perguruan Tinggi`))
+)
+
+kable(summ, caption = 'Hasil Statistika Deskriptif', align = 'c')
+```
+
+Simpangan baku yang tinggi sebesar $2016$ menunjukkan ketimpangan persebaran SD yang signifikan. Beberapa provinsi memiliki jumlah SD yang jauh lebih banyak dibandingkan provinsi lain. Nilai maksimum yang mencapai $8442$ sekolah menunjukkan adanya provinsi dengan kepadatan SD yang sangat tinggi.
+
+Jumlah SMP juga menunjukkan perbedaan besar antardaerah, meskipun tidak setinggi SD. Simpangan baku lebih dari $1000$ menandakan distribusi yang masih sangat bervariasi. Ada provinsi dengan hanya $110$ SMP, sementara yang terbanyak mencapai $4.905$.
+
+Nilai minimum yang rendah $32$ dibandingkan maksimum $2587$ menunjukkan adanya kesenjangan antardaerah. Rata-rata $477$ sekolah menandakan bahwa mayoritas provinsi berada pada kisaran ratusan SMA.Sedangkan jumlah SMK sangat beragam dan memiliki ketimpangan terbesar relatif terhadap rata-ratanya. Provinsi dengan jumlah SMK terbanyak sangat jauh melampaui provinsi dengan jumlah terendah, menunjukkan ketidakseimbangan fasilitas pendidikan kejuruan di Indonesia. 
+
+Perguruan tinggi memiliki penyebaran paling kecil dibanding jenjang lainnya, tetapi masih terlihat ketimpangan. Nilai minimum $8$ dan maksimum $477$ menunjukkan perbedaan cukup besar. Simpangan baku $110 menunjukkan variasi sedang-tinggi, namun relatif lebih stabil dibanding jenjang SD–SMK.
+
+## 4.2. Menentukan K-optimal
+```{r, echo=F}
+fviz_nbclust(data[,-1], kmeans, method = "silhouette")
+```
+
+Berdasarkan plot, titik yang berada di puncak garis yaitu pada saat banyak _cluster_ sebanyak $2$ Maka, berdasarkan metode _silhouette_, banyak _cluster_ optimal adalah $2$ _cluster_
+
+## 4.3. Metode _K-Means_
+### 4.3.1 Menentukan Anggota Kelompok
+```{r, echo=F}
+set.seed(123)
+km <- kmeans(data[,-1], centers = 2)
+
+data$cluster <- as.factor(km$cluster)
+kable(data, caption = 'Tabel Provinsi di Indonesia')
+c1 = data$PROVINSI[data$cluster == 1]
+c2 = data$PROVINSI[data$cluster == 2]
+c1 = paste(c1, collapse = ',')
+c2 = paste(c2, collapse = ',')
+
+kelompok = data.frame(
+  Cluster = c(' cluster 1','cluster 2'),
+  Anggota = c(c1,c2)
+)
+kable(kelompok, caption = 'Anggota kelompok hasil  clustering')
+```
+
+Berdasarkan hasil dari algoritma _K-means_ provinsi di Indonesia sudah terbagi menjadi $2$ kelompok. Pada _cluster_ 1, terdapat $34$ provinsi dan pada _cluster_ 2 terdapat $4$ provinsi.
+
+### 4.3.2 Visualisasi
+```{r, echo=F}
+fviz_cluster(km, data = dataclust)
+
+karakteristik <- dataclust %>%
+  mutate( cluster = km$cluster) %>%
+  group_by(cluster) %>%
+  summarise_all("mean")
+
+kable(karakteristik, caption = 'Karakteristik Cluster', digits = 3)
+```
+
+Berdasarkan hasil analisis _cluster_ pada tabel, terlihat bahwa _cluster_ 1 memiliki jumlah  SD, SMP, SMU, SMK, dan Perguruan Tinggi yang jauh lebih rendah dibandingkan _cluster_ 2. Hal ini menunjukkan bahwa _cluster_ 1 cenderung mewakili wilayah dengan tingkat pendidikan relatif lebih rendah dan jumlah populasi yang lebih kecil di setiap jenjang pendidikan. Sebaliknya, _cluster_ 2 ditandai dengan jumlah yang jauh lebih besar pada semua tingkat pendidikan, mulai dari SD hingga Perguruan Tinggi. Kondisi ini menggambarkan bahwa _cluster_ 2 merupakan kelompok wilayah dengan jumlah pencapaian pendidikan yang lebih tinggi dibandingkan _cluster_ 1. Dengan demikian, perbedaan utama antara kedua _cluster_ adalah pada jumlah tempat pendidikan, di mana _cluster_ 2 berada pada kategori tinggi dan _cluster_ 1 berada pada kategori rendah.
+
+
+## 4.4. Indeks Validitas
+```{r, echo = F}
+sil <- silhouette(km$cluster, dist(dataclust, method = 'euclidean'))
+sil_df <- as.data.frame(sil)
+sil_avg_per_cluster <- sil_df %>% 
+  group_by(cluster) %>%
+  summarise(`Mean Silhouette` = mean(sil_width))
+
+kable(sil_avg_per_cluster, caption = 'Rata-rata nilai silhouette tiap cluster', digits = 3)
+```
+
+Nilai rata-rata _silhouette_ pada masing-masing _cluster_ menunjukkan seberapa baik setiap provinsi cocok dengan _cluster_-nya dibandingkan dengan _cluster_ lainnya. Semakin tinggi nilai _silhouette_, semakin baik pemisahan _cluster_ yang terbentuk. Secara keseluruhan, hasil evaluasi _silhouette_ mendukung bahwa pemilihan dua _cluster_ dalam analisis ini cukup baik, dengan mayoritas _cluster_ menunjukkan nilai _silhouette_ yang tinggi.
+
+# 5. Kesimpulan dan Saran
+## 5.1. Kesimpulan
+
+Berdasarkan hasil analisis dan pembahasan yang telah dilakukan, maka kesimpulan dari penelitian ini adalah: 
+
+1. Jumlaah _cluster_ optimal untuk mengklasifikasikan provinsi di Indonesia berdasarkan fasilitias pendidikan sebanyak $2$ _cluster_.
+
+2. Rata-rata jumlah fasilitas pendidikan pada _cluster_ 2 lebih tinggi dibandingkan dengan _cluster_ 1 sehingga _cluster_ 2 berada pada kategori tinggi dan _cluster_ 1 berada pada kategori rendah.
+
+## 5.2. Saran
+
+Berdasarkan hasil penelitian ini, disarankan untuk Pemerintah daerah di provinsi _cluster_ 1 disarankan untuk melakukan evaluasi mendalam terkait faktor-faktor yang menyebabkan rendahnya jumlah fasilitas pendidikan, seperti keterbatasan anggaran, kondisi geografis, atau kepadatan penduduk. Intervensi yang lebih terarah dapat dirancang untuk meningkatkan akses dan ketersediaan fasilitas pendidikan. Selain itu, penelitian mendatang dapat menggunakan metode klasterisasi yang mempertimbangkan aspek spasial, seperti _Spatial K-Means_ atau _Geographically Weighted clustering_, sehingga kedekatan geografis antarwilayah dapat tercermin dalam hasil pengelompokan. Peneliti juga dapat menambahkan variabel tambahan seperti kepadatan penduduk, luas wilayah, tingkat aksesibilitas pendidikan, dan indikator sosial ekonomi lainnya untuk memperoleh _cluster_ yang lebih kaya dan representatif.
+
+
+# 6. Daftar Pustaka
+
+Awaliyah, L., Rahaningsih, N., & Dana, R., D. (2024). Implementasi Algoritma K-Means Dalam Analisis Cluster Korban Kekerasan di Provinsi Jawa Barat. _JATI (Jurnal Mahasiswa Teknik Informatika)_, 8(1), 188-195. <br>
+Putri, A. A. A., & Rahmah, S. A. (2024). Implementasi Data Mining dengan Algoritma K-Means Clustering untuk Analisis Bisnis pada Perusahaan Asuransi. _Jurnal Teknologi Informasi_, 5(1), 139-152. <br>
+Pribadi, W. W., Yunus, A., & Wiguna, A. S. (2022). Perbandingan Metode K-Means Euclidean Distance dan Manhattan Distance pada Penentuan Zonasi COVID-19 di Kabupaten Malang. _JATI (Jurnal Mahasiswa Teknik Informatika)_, 6(2), 493-500.
+
+
+
+</div>
